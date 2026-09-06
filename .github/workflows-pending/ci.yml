@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main, genspark_ai_developer]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: lint · typecheck · test · content · balance · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Cache Noto emoji PNGs
+        uses: actions/cache@v4
+        with:
+          path: .noto-cache
+          key: noto-${{ hashFiles('packages/content/src/emojis.ts', 'tools/build-atlas.ts') }}
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run validate:content
+      - run: npm test -- --coverage
+      - name: Balance simulation (GreedyBot, 20 games × 140 levels)
+        run: npm run sim -- 20
+        env: { CI_STRICT_BALANCE: '1' }
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with: { name: pwa-dist, path: packages/app/dist, retention-days: 7 }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: coverage, path: coverage, retention-days: 7 }
