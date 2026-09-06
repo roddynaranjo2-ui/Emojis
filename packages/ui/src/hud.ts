@@ -24,25 +24,28 @@ export interface HudState {
   progress: Array<{ target?: string; type: string; current: number; amount: number; done: boolean }>;
 }
 
+export interface HudLabels { lives: string; coins: string; moves: string; score: string; pause: string; hint: string; sound: string; muted: string; objective: string; blockers: string; dust: string; cages: string; combos: string[] }
+export const HUD_LABELS_EN: HudLabels = { lives: 'Lives', coins: 'Coins', moves: 'Moves', score: 'Score', pause: 'pause', hint: 'hint', sound: 'sound', muted: 'muted', objective: 'Objective', blockers: 'Blockers', dust: 'Dust', cages: 'Cages', combos: ['NICE', 'GREAT', 'AMAZING', 'WOW', 'UNREAL', 'LEGENDARY'] };
+
 export class Hud {
   private top: HTMLElement; private bottom: HTMLElement; private combo: HTMLElement; private toastEl: HTMLElement;
   private comboTimer: number | undefined;
   private lastMoves = -1;
 
-  constructor(root: HTMLElement, handlers: { onPause(): void; onMute(): void; onHint(): void }) {
+  constructor(root: HTMLElement, handlers: { onPause(): void; onMute(): void; onHint(): void }, private L: HudLabels = HUD_LABELS_EN) {
     root.innerHTML = `
       <div id="hud-top">
-        ${pill(`${em('ui_heart', 28, 'Lives')}<span class="num" id="lives">5</span>`)}
+        ${pill(`${em('ui_heart', 28, L.lives)}<span class="num" id="lives">5</span>`)}
         <div id="objectives" style="display:flex;gap:8px"></div>
-        ${pill(`${em('ui_coin', 28, 'Coins')}<span class="num" id="coins">0</span>`)}
+        ${pill(`${em('ui_coin', 28, L.coins)}<span class="num" id="coins">0</span>`)}
       </div>
       <div id="board"><div id="combo"></div><div id="intro"></div></div>
       <div id="hud-bottom">
-        ${ebtn('ui_pause', 'pause', 'btn-pause')}
-        ${pill(`${em('ui_moves', 28, 'Moves')}<span class="num" id="moves">0</span>`)}
-        ${pill(`${em('ui_star', 28, 'Score')}<span class="num" id="score">0</span>`)}
-        ${ebtn('ui_hint', 'hint', 'btn-hint')}
-        ${ebtn('ui_sound', 'sound', 'btn-mute')}
+        ${ebtn('ui_pause', L.pause, 'btn-pause')}
+        ${pill(`${em('ui_moves', 28, L.moves)}<span class="num" id="moves">0</span>`)}
+        ${pill(`${em('ui_star', 28, L.score)}<span class="num" id="score">0</span>`)}
+        ${ebtn('ui_hint', L.hint, 'btn-hint')}
+        ${ebtn('ui_sound', L.sound, 'btn-mute')}
       </div>
       <div id="toast" class="glass"></div>`;
     this.top = root.querySelector('#hud-top')!;
@@ -56,7 +59,7 @@ export class Hud {
 
   setMuted(m: boolean): void {
     const b = document.getElementById('btn-mute')!;
-    b.innerHTML = `${em(m ? 'ui_mute' : 'ui_sound', 28, 'sound')}<span>${m ? 'muted' : 'sound'}</span>`;
+    b.innerHTML = `${em(m ? 'ui_mute' : 'ui_sound', 28, this.L.sound)}<span>${m ? this.L.muted : this.L.sound}</span>`;
   }
 
   setLives(n: number): void { this.top.querySelector('#lives')!.textContent = String(n); }
@@ -72,9 +75,9 @@ export class Hud {
 
     const box = this.top.querySelector('#objectives')!;
     box.innerHTML = s.progress.map((p) => {
-      const icon = p.type === 'collect' || p.type === 'reach_tier' ? em(p.target!, 28) : p.type === 'score' ? em('ui_star', 28, 'Score') : p.type === 'clear_dust' ? '<span class="gl" title="Dust">🟪</span>' : p.type === 'break_cages' ? '<span class="gl" title="Cages">🔗</span>' : em('bl_rock', 28, 'Blockers');
+      const icon = p.type === 'collect' || p.type === 'reach_tier' ? em(p.target!, 28) : p.type === 'score' ? em('ui_star', 28, this.L.score) : p.type === 'clear_dust' ? `<span class="gl" title="${this.L.dust}">🟪</span>` : p.type === 'break_cages' ? `<span class="gl" title="${this.L.cages}">🔗</span>` : em('bl_rock', 28, this.L.blockers);
       const pct = Math.min(100, Math.round((p.current / p.amount) * 100));
-      return `<div class="glass pill objective ${p.done ? 'done' : ''}">${em('ui_target', 20, 'Objective')}${icon}<span class="num">${p.done ? '✅' : `${Math.min(p.current, p.amount)}/${p.amount}`}</span><div class="bar"><i style="width:${pct}%"></i></div></div>`;
+      return `<div class="glass pill objective ${p.done ? 'done' : ''}">${em('ui_target', 20, this.L.objective)}${icon}<span class="num">${p.done ? '✅' : `${Math.min(p.current, p.amount)}/${p.amount}`}</span><div class="bar"><i style="width:${pct}%"></i></div></div>`;
     }).join('');
   }
 
@@ -89,7 +92,7 @@ export class Hud {
 
   showCombo(combo: number): void {
     if (combo < 2) return;
-    const words = ['', '', 'NICE', 'GREAT', 'AMAZING', 'WOW', 'UNREAL', 'LEGENDARY'];
+    const words = ['', '', ...this.L.combos];
     const emojis = ['', '', '👍', '🔥', '🤩', '💥', '🚀', '🌌'];
     const i = Math.min(combo, words.length - 1);
     this.combo.innerHTML = `${emojis[i]} ${words[i]} ×${combo}`;

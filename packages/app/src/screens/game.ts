@@ -7,6 +7,9 @@ import { state, PRICES } from '../state';
 import { openModal, closeModal, toast } from '../router';
 import { showWin, showLose, showTutorial } from './popups';
 import { awardAchievements } from '../achievements';
+import { t } from '../i18n';
+import { emojiName, levelName } from '../names';
+import { hudLabels } from '../hudLabels';
 
 export interface GameHandlers {
   onExitToMap(): void;
@@ -39,8 +42,8 @@ export class GameScreen {
     this.hud = new Hud(el, {
       onPause: () => this.pause(),
       onMute: () => { state.save.settings.sfx = !state.save.settings.sfx; state.commit(); sfx.setMuted(!state.save.settings.sfx); this.hud.setMuted(!state.save.settings.sfx); haptics.tick(); },
-      onHint: () => { const s = this.scene(); if (!s || s.isBusy()) return; const m = s.debugHint(); this.hud.toast(m ? `${em('ui_hint', 20)} a move is glowing on the board` : `${em('ui_hint', 20)} no moves — the board will shuffle`, 1400); },
-    });
+      onHint: () => { const s = this.scene(); if (!s || s.isBusy()) return; const m = s.debugHint(); this.hud.toast(m ? `${em('ui_hint', 20)} ${t('hud.hintGlow')}` : `${em('ui_hint', 20)} ${t('hud.noMoves')}`, 1400); },
+    }, hudLabels());
     this.buildBoosterBar();
   }
 
@@ -69,7 +72,7 @@ export class GameScreen {
       const n = b[k] ?? 0;
       return `<button class="bst ${k === 'hammer' && this.hammerOn ? 'on' : ''}" data-k="${k}" title="${title}" ${n <= 0 ? 'disabled' : ''}>${em(e, 28, title)}<span class="cnt ${n ? '' : 'zero'}">${n}</span></button>`;
     };
-    this.boosterBar.innerHTML = item('hammer', 'hammer', 'Hammer — smash any piece') + item('shuffle', 'ui_retry', 'Shuffle the board');
+    this.boosterBar.innerHTML = item('hammer', 'hammer', t('hud.hammerTitle')) + item('shuffle', 'ui_retry', t('hud.shuffleTitle'));
   }
 
   private async useInGameBooster(k: 'hammer' | 'shuffle'): Promise<void> {
@@ -77,13 +80,13 @@ export class GameScreen {
     if (k === 'hammer') {
       if ((state.save.boosters.hammer ?? 0) <= 0) return;
       this.hammerOn = !this.hammerOn; s.setHammerMode(this.hammerOn); this.refreshBoosterBar();
-      this.hud.toast(this.hammerOn ? `${em('hammer', 20)} tap a piece to smash it` : `${em('hammer', 20)} hammer put away`, 1300);
+      this.hud.toast(this.hammerOn ? `${em('hammer', 20)} ${t('hud.hammerOn')}` : `${em('hammer', 20)} ${t('hud.hammerOff')}`, 1300);
       haptics.tick();
       return;
     }
     if (s.isBusy() || (state.save.boosters.shuffle ?? 0) <= 0) return;
     const ok = await s.useBooster('shuffle');
-    if (ok) { state.useBooster('shuffle'); this.refreshBoosterBar(); this.hud.toast(`${em('ui_retry', 20)} shuffled — no move spent`, 1300); }
+    if (ok) { state.useBooster('shuffle'); this.refreshBoosterBar(); this.hud.toast(`${em('ui_retry', 20)} ${t('hud.shuffled')}`, 1300); }
   }
 
   // ── Lifecycle ───────────────────────────────────────────────────────────
@@ -110,7 +113,7 @@ export class GameScreen {
     }
 
     const showHand = level.number === 1 && !state.seenTutorial('hand');
-    this.hud.intro(EMOJI_BY_ID[level.spawnPool[2]!]?.glyph ?? level.glyph, `${worldGlyph} ${level.name}`);
+    this.hud.intro(EMOJI_BY_ID[level.spawnPool[2]!]?.glyph ?? level.glyph, `${worldGlyph} ${levelName(level)}`);
 
     const bridge: HudBridge = {
       onState: (s) => { this.lastProgress = s.progress; this.hud.update(s); },
@@ -123,7 +126,7 @@ export class GameScreen {
           const def = EMOJI_BY_ID[emoji];
           const rarity = def ? (['common', 'rare', 'epic', 'legendary'] as const).indexOf(def.rarity) : 0;
           sfx.discover(Math.max(0, rarity) as 0 | 1 | 2 | 3); haptics.discover(Math.max(0, rarity));
-          this.hud.toast(`${em('ui_new', 20)} ${em(emoji, 28)} <b>${def?.name ?? emoji}</b> discovered · ${em('ui_dex', 20)} ${state.save.dex.length}/144`, 2200);
+          this.hud.toast(`${em('ui_new', 20)} ${em(emoji, 28)} ${t('hud.discovered', { name: emojiName(emoji) })} · ${em('ui_dex', 20)} ${state.save.dex.length}/144`, 2200);
         }
       },
       onLevelEnd: (won, stars, score, nearMiss) => this.onEnd(won, stars, score, nearMiss),
@@ -170,7 +173,7 @@ export class GameScreen {
       () => { // +5 moves (coins already spent by the popup)
         const s = this.scene(); if (!s) { this.h.onRetry(level); return; }
         this.ended = false; s.addMoves(5); this.hud.setCoins(state.save.coins);
-        this.hud.toast(`${em('ui_moves', 20)} +5 moves — make them count!`, 1500);
+        this.hud.toast(`${em('ui_moves', 20)} ${t('hud.extraMoves')}`, 1500);
       },
       () => { if (!nearMiss) state.recordLoss(level.id); this.h.onRetry(level); },
       () => { if (!nearMiss) state.recordLoss(level.id); this.h.onExitToMap(); });
@@ -183,16 +186,16 @@ export class GameScreen {
     const level = this.level;
     const m = openModal(this.el, `
       <span class="hero">⏸️</span>
-      <div class="title">Paused</div>
-      <div class="sub">${level.event ? `Stage ${level.index}` : `Level ${level.number}`} · ${level.name}</div>
-      <button class="ebtn cta" id="p-resume" style="width:100%">${em('ui_play', 28)}<span>Resume</span></button>
+      <div class="title">${t('pause.title')}</div>
+      <div class="sub">${level.event ? `${t('common.stage')} ${level.index}` : `${t('common.level')} ${level.number}`} · ${levelName(level)}</div>
+      <button class="ebtn cta" id="p-resume" style="width:100%">${em('ui_play', 28)}<span>${t('pause.resume')}</span></button>
       <div class="row" style="margin-top:10px">
-        <button class="ebtn cta ghost" id="p-map">${em('ui_map', 28, 'Map')}<span>Quit</span></button>
-        <button class="ebtn cta ghost grow" id="p-retry">${em('ui_retry', 28, 'Retry')}<span>Restart</span></button>
+        <button class="ebtn cta ghost" id="p-map">${em('ui_map', 28, t('common.map'))}<span>${t('pause.quit')}</span></button>
+        <button class="ebtn cta ghost grow" id="p-retry">${em('ui_retry', 28)}<span>${t('pause.restart')}</span></button>
       </div>`, { id: 'pause', dismissable: false });
     m.querySelector('#p-resume')!.addEventListener('click', () => { closeModal('pause'); this.game?.scene.resume('board'); });
     m.querySelector('#p-retry')!.addEventListener('click', () => { closeModal('pause'); this.ended = true; this.h.onRetry(level); });
-    m.querySelector('#p-map')!.addEventListener('click', () => { closeModal('pause'); this.ended = true; toast(`${em('ui_heart', 20)} life kept — see you on the map`); this.h.onExitToMap(); });
+    m.querySelector('#p-map')!.addEventListener('click', () => { closeModal('pause'); this.ended = true; toast(`${em('ui_heart', 20)} ${t('pause.lifeKept')}`); this.h.onExitToMap(); });
   }
 
   /** Resume a paused board (native back button closes the pause modal). */

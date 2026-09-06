@@ -321,3 +321,6 @@ body { -webkit-user-select: none; user-select: none; touch-action: none; }
 .ach small { font-size: 11px; color: var(--ink-dim); font-weight: 700; }
 .dim-secret { filter: grayscale(1) brightness(.6); opacity: .7; }
 #install-row[hidden] { display: none; }
+.lang-row { display: flex; gap: 6px; }
+.lang { padding: 4px 8px 3px; gap: 0; }
+.lang.on { border-color: #ffd166; background: rgba(255,209,102,.2); color: #fff; }

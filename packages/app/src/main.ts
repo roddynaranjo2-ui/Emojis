@@ -14,6 +14,7 @@ import { showLevelSheet, showNoLives, showDaily } from './screens/popups';
 import { GameScreen } from './screens/game';
 import { renderEvent } from './screens/event';
 import { initNative } from './native';
+import { t, locale } from './i18n';
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 const root = document.getElementById('app')!;
@@ -36,8 +37,8 @@ const splashEl = mk(), mapEl = mk(), gameEl = mk(), dexEl = mk(), labEl = mk(), 
 let currentLevel: LevelDef | null = null;
 
 const nextLevelDef = (): LevelDef => LEVELS[Math.min(LEVELS.length, state.save.unlocked) - 1]!;
-renderSplash(splashEl, () => { sfx.unlock(); haptics.tick(); if (state.save.firstRun) { state.save.firstRun = false; state.commit(); } router.go('map'); },
-  state.save.unlocked > 1 ? `Continue · Level ${state.save.unlocked}` : 'Play');
+document.documentElement.lang = locale();
+renderSplash(splashEl, () => { sfx.unlock(); haptics.tick(); if (state.save.firstRun) { state.save.firstRun = false; state.commit(); } router.go('map'); }, state.save.unlocked);
 
 const map = renderMap(mapEl, {
   onLevel: (l) => void openLevel(l),
@@ -47,20 +48,25 @@ const map = renderMap(mapEl, {
   onSettings: () => router.go('settings'),
   onDaily: () => { sfx.unlock(); showDaily(); },
   onEvent: () => router.go('event'),
-  onLives: () => { if (state.save.lives < 5) showNoLives(() => map.refresh(), () => undefined); else toast(`${em('ui_heart', 20)} lives are full`); },
+  onLives: () => { if (state.save.lives < 5) showNoLives(() => map.refresh(), () => undefined); else toast(`${em('ui_heart', 20)} ${t('map.livesFull')}`); },
 });
 const dex = renderDex(dexEl, () => router.go('map'));
 const eventScreen = renderEvent(eventEl, { onBack: () => router.go('map'), onStage: (l) => void openLevel(l) });
-const lab = renderLab(labEl, () => router.go('map'), (emoji) => { dex.refresh(); toast(`${em('ui_new', 20)} ${em(emoji, 28)} added to your Emoji-dex`); });
+const lab = renderLab(labEl, () => router.go('map'), (emoji) => { dex.refresh(); toast(`${em('ui_new', 20)} ${em(emoji, 28)} ${t('lab.addedToast')}`); });
 const shop = renderShop(shopEl, () => router.go('map'));
-const settings = renderSettings(settingsEl, () => router.go('map'), () => { state.reset(); applySettings(); router.go('splash'); location.reload(); });
+const settings = renderSettings(settingsEl, {
+  onBack: () => router.go('map'),
+  onReset: () => { state.reset(); applySettings(); router.go('splash'); location.reload(); },
+  // static screen chrome is rendered once → the cleanest way to re-label everything is a reload (state is persisted)
+  onLocale: () => { document.documentElement.lang = locale(); setTimeout(() => { location.replace(location.pathname + '?screen=settings'); }, 250); },
+});
 
 const game = new GameScreen(gameEl, {
   onExitToMap: () => router.go(currentLevel?.event ? 'event' : 'map'),
   onRetry: (l) => void openLevel(l, true),
   onNext: (l) => {
     if (l.event) { const n = eventLevels(l.event)[l.index]; if (n) void openLevel(n); else router.go('event'); return; }
-    const n = LEVELS[l.number]; if (n) void openLevel(n); else { toast(`${em('ui_star', 20)} You finished every level — more worlds coming!`, 2600); router.go('map'); }
+    const n = LEVELS[l.number]; if (n) void openLevel(n); else { toast(`${em('ui_star', 20)} ${t('win.allDone')}`, 2600); router.go('map'); }
   },
   onWin: (l) => { if (l.event) state.recordEventStage(l.event, Math.floor(Date.now() / EVENT_WEEK_MS), l.index); },
 });

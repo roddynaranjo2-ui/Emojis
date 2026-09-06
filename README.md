@@ -12,6 +12,7 @@
 | **Engine** | TypeScript 5 · Phaser 3.90 (WebGL) · HTML/CSS HUD · Vite · Capacitor 6 |
 | **Rules engine** | Pure, deterministic, renderer‑agnostic (`packages/core`) — 42 Vitest specs |
 | **Content** | 144 curated emojis · 12 families · 20 evolution chains · 71 cross recipes · **7 worlds × 20 = 140 levels** · **4 weekly vault events × 8 stages** (all auto‑tuned) |
+| **Languages** | 🇬🇧 EN · 🇪🇸 ES · 🇧🇷 PT · 🇫🇷 FR — auto‑detected, switchable in Options; 144 emoji names + 140 level titles (ES) localised; completeness enforced by tests |
 | **Native** | Capacitor 6 Android project committed (adaptive icon, splash, portrait, back button, status bar); iOS via `cap add ios` |
 | **Audio** | 100 % procedural: SFX engine (pentatonic combo ladder) + per‑world adaptive music with ducking — zero audio files |
 | **Build size** | 78 KB game code + 1.2 MB Phaser (vendored, cacheable) + 0.9 MB emoji atlas |
@@ -88,7 +89,7 @@ tools/
 | Command | Gate |
 |---|---|
 | `npm run lint` · `npm run typecheck` | ESLint + `tsc --strict --noUncheckedIndexedAccess` |
-| `npm test` | 47 specs: shapes, specials, **all synergies**, blockers, dust, cages, holes, boosters, tap‑to‑fire, +moves, cascades, determinism, mercy |
+| `npm test` | 51 specs (incl. i18n completeness): shapes, specials, **all synergies**, blockers, dust, cages, holes, boosters, tap‑to‑fire, +moves, cascades, determinism, mercy |
 | `npm run validate:content` | exactly 144 emojis / 12 per family / 96 launch; every launch emoji reachable from base pieces; recipe mix ≈ 40/30/30 |
 | `npm run sim -- 20` | GreedyBot win‑rate per level must stay in band (30–90 %, boss 15–85 %, first three ≥ 50 %); `CI_STRICT_BALANCE=1` fails the build |
 | `npm run tune -- 12` | re‑tunes every level's move budget and rewrites `tuning.ts` |
@@ -105,6 +106,18 @@ Workflows live in [`.github/workflows-pending/`](.github/workflows-pending/) —
 - **F1 ✓** Laboratory 🧪 · Emoji‑dex 📖 with silhouettes & echoes · economy (lives/coins/boosters) · daily gift · settings
 - **F2 ✓** Saga Map (7 worlds × 20 levels) · bosses · dust/cages/holes · tutorials · adaptive music · auto‑tuned balance
 - **F3** Capacitor iOS/Android builds (workflow ready) · store assets · vault events (content exists)
+
+## 🚀 Releasing
+
+```bash
+npm run bump -- 0.4.1        # package.json · version.ts · Android versionCode/Name
+git commit -am "chore: v0.4.1" && git tag v0.4.1 && git push --tags
+```
+`release.yml` (pending activation) then builds the PWA zip, a **signed** Android AAB + APK (when the `ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` secrets exist — otherwise unsigned), an unsigned iOS `.xcarchive` on a macOS runner, and attaches everything to a GitHub Release. Local signed builds: copy `android/keystore.properties.example` → `keystore.properties`.
+
+## 💾 Save backup
+
+Options → *Backup*: **Copy save code** (OS share sheet or clipboard), **Download file**, **Paste save code** to restore on another device. Codes are `EMV1.<crc32>.<base64url(deflate(json))>` (~400 chars), validated before import. A hosted sync endpoint can accept the same codes later.
 
 ## 📱 Android build
 

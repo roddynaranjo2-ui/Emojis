@@ -22,3 +22,5 @@ packages/app/ios/App/App/public/
 packages/app/ios/App/App/capacitor.config.json
 packages/app/ios/App/build/
 .env
+packages/app/android/keystore.properties
+packages/app/android/release.keystore

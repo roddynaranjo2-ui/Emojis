@@ -81,3 +81,11 @@ Phaser (1.2 MB) is **not** bundled: `rollupOptions.external: ['phaser']`, copied
 ## 10. Events
 
 `content/events.ts` defines 4 `EventDef`s; `eventNextTier(ev)` overlays the event chains on `NEXT_TIER` and is passed as `RulesConfig.nextTier` when `level.event` is set, so the core engine needs no changes. Stage levels reuse `LevelDef` (`world: 0`, `number ≥ 1000`, `event` tag); `recordWin` ignores them for saga unlocking. `liveEvent(now)` derives the current event from the epoch week — no server, deterministic for everyone. Progress lives in `save.events[eventId] = { cleared, claimed, week }` and resets when `week` changes.
+
+## 11. Localisation
+
+`packages/app/src/i18n/` holds one flat dictionary per locale (`en.ts` is the typed source of truth; `es/pt/fr.ts` are `Record<keyof typeof en, string>` so a missing key is a compile error). `t(key, vars)` replaces `{var}` placeholders; `t2(key)` splits `Name|Description` pairs (achievements, worlds). `names.ts` localises the 144 emoji names and `levelNames.ts` the 140 level + 32 stage titles (ES). Locale = saved choice → `navigator.language` → `en`. The `ui` package stays locale‑agnostic: `Hud` receives a `HudLabels` object built by `app/hudLabels.ts`. Switching language reloads the app (all screens render their chrome once). `i18n.test.ts` enforces key parity, non‑empty strings and identical placeholders across locales.
+
+## 12. Save backup
+
+`backup.ts` serialises the `Save` to `EMV1.<crc32>.<base64url(deflate-raw(json))>` using `CompressionStream` (falls back to raw UTF‑8 where unavailable). Import verifies magic + checksum + shape before writing `localStorage` and reloading. Share uses `navigator.share` when present, else clipboard; download creates a `.txt` blob.

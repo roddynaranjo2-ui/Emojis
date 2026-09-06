@@ -1,8 +1,8 @@
 {
   "name": "emojiverse",
   "private": true,
-  "version": "0.1.0",
-  "description": "EMOJIVERSE — match-3 evolution + alchemy discovery, built 100% from Google Noto Color Emoji",
+  "version": "0.4.0",
+  "description": "EMOJIVERSE \u2014 match-3 evolution + alchemy discovery, built 100% from Google Noto Color Emoji",
   "type": "module",
   "workspaces": [
     "packages/*"
@@ -24,7 +24,8 @@
     "cap:sync": "npx cap sync",
     "e2e": "python3 tools/e2e/smoke.py",
     "serve:dist": "python3 -m http.server 4173 --bind 0.0.0.0 -d packages/app/dist",
-    "tune": "tsx tools/tune.ts"
+    "tune": "tsx tools/tune.ts",
+    "bump": "tsx tools/bump-version.ts"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.0",

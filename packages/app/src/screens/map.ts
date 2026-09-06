@@ -1,6 +1,7 @@
 import { em } from '@emojiverse/ui';
 import { LEVELS, WORLDS, liveEvent, EVENT_WEEK_MS, type LevelDef } from '@emojiverse/content';
 import { fmtCountdown } from './event';
+import { t, t2, type Key } from '../i18n';
 import { state, MAX_LIVES } from '../state';
 import { fmtTime } from '../router';
 
@@ -9,17 +10,17 @@ export interface MapHandlers { onLevel(l: LevelDef): void; onDex(): void; onLab(
 export function renderMap(el: HTMLElement, h: MapHandlers): { refresh(): void } {
   el.innerHTML = `
     <div class="topbar">
-      <div class="glass pill" id="map-lives">${em('ui_heart', 28, 'Lives')}<span class="num">5</span><span class="timer"></span></div>
-      <div class="title">${em('ui_map', 28, 'Map')}<span id="map-world">World 1</span></div>
-      <div class="glass pill">${em('ui_coin', 28, 'Coins')}<span class="num" id="map-coins">0</span></div>
+      <div class="glass pill" id="map-lives">${em('ui_heart', 28, t('common.lives'))}<span class="num">5</span><span class="timer"></span></div>
+      <div class="title">${em('ui_map', 28, t('common.map'))}<span id="map-world"></span></div>
+      <div class="glass pill">${em('ui_coin', 28, t('common.coins'))}<span class="num" id="map-coins">0</span></div>
     </div>
     <div class="body" id="map-body"></div>
     <div id="map-nav">
-      <button class="ebtn" id="nav-dex">${em('ui_dex', 28, 'Emoji-dex')}<span>dex</span><b class="badge" id="dex-badge" hidden></b></button>
-      <button class="ebtn" id="nav-lab">${em('ui_lab', 28, 'Laboratory')}<span>lab</span></button>
-      <button class="ebtn" id="nav-daily">${em('ui_gift', 28, 'Daily gift')}<span>daily</span><b class="badge" id="daily-badge" hidden>!</b></button>
-      <button class="ebtn" id="nav-shop">${em('ui_shop', 28, 'Shop')}<span>shop</span></button>
-      <button class="ebtn" id="nav-settings">${em('ui_settings', 28, 'Settings')}<span>options</span></button>
+      <button class="ebtn" id="nav-dex">${em('ui_dex', 28, t('dex.title'))}<span>${t('map.nav.dex')}</span><b class="badge" id="dex-badge" hidden></b></button>
+      <button class="ebtn" id="nav-lab">${em('ui_lab', 28, t('lab.title'))}<span>${t('map.nav.lab')}</span></button>
+      <button class="ebtn" id="nav-daily">${em('ui_gift', 28, t('daily.title'))}<span>${t('map.nav.daily')}</span><b class="badge" id="daily-badge" hidden>!</b></button>
+      <button class="ebtn" id="nav-shop">${em('ui_shop', 28, t('shop.title'))}<span>${t('map.nav.shop')}</span></button>
+      <button class="ebtn" id="nav-settings">${em('ui_settings', 28, t('set.title'))}<span>${t('map.nav.options')}</span></button>
     </div>`;
   el.querySelector('#nav-dex')!.addEventListener('click', h.onDex);
   el.querySelector('#nav-lab')!.addEventListener('click', h.onLab);
@@ -37,7 +38,7 @@ export function renderMap(el: HTMLElement, h: MapHandlers): { refresh(): void } 
     const unlocked = state.save.unlocked >= 6; // events open after the first 5 levels
     return `<button class="glass ev-banner ${unlocked ? '' : 'locked'}" id="map-event" style="--ev-a:${event.palette[0]};--ev-b:${event.palette[1]}">
       <span class="g">${event.glyph}</span>
-      <span class="t"><b>${event.name}</b><small>${unlocked ? `${event.tagline} · ${p.cleared}/8` : 'Unlocks at level 6'}</small></span>
+      <span class="t"><b>${t(`ev.${event.id}.name` as Key)}</b><small>${unlocked ? `${t(`ev.${event.id}.tag` as Key)} · ${p.cleared}/8` : t('map.eventLocked')}</small></span>
       <span class="timer">⏳ ${fmtCountdown(endsAt - Date.now())}</span>
     </button>`;
   };
@@ -49,11 +50,11 @@ export function renderMap(el: HTMLElement, h: MapHandlers): { refresh(): void } 
         const s = state.save.stars[l.id] ?? 0;
         const cls = l.number < state.save.unlocked ? 'done' : l.number === state.save.unlocked ? 'current' : 'locked';
         const starHtml = [1, 2, 3].map((i) => `<span class="${i <= s ? '' : 'off'}">⭐</span>`).join('');
-        const tag = l.difficulty === 'boss' ? `<span class="tag boss">boss</span>` : l.difficulty === 'hard' ? `<span class="tag">hard</span>` : '';
+        const tag = l.difficulty === 'boss' ? `<span class="tag boss">${t('map.boss')}</span>` : l.difficulty === 'hard' ? `<span class="tag">${t('map.hard')}</span>` : '';
         return `<div class="node ${cls} ${l.difficulty === 'boss' ? 'boss' : ''}" data-id="${l.id}">${tag}<button aria-label="Level ${l.number}">${cls === 'locked' ? '🔒' : l.difficulty === 'boss' ? l.glyph : l.number}</button><div class="stars">${cls === 'locked' ? '' : starHtml}</div><div class="lvl">${l.difficulty === 'boss' ? `Lv ${l.number}` : l.name}</div></div>`;
       }).join('');
       return `<section class="world" data-world="${w.id}" style="background:linear-gradient(180deg, ${w.palette[0]}33, ${w.palette[1]}22)">
-        <div class="wtitle"><span class="g">${w.glyph}</span><div><div class="n">World ${w.id} · ${w.name}</div><div class="m">${w.mood}</div></div><div class="grow"></div><div class="muted" title="All 60 stars discover a secret emoji">⭐ ${stars}/60 · <span class="${state.save.dex.includes(w.secret) ? '' : 'dim-secret'}">${em(w.secret, 20)}</span></div></div>
+        <div class="wtitle"><span class="g">${w.glyph}</span><div><div class="n">${t('map.world', { n: w.id, name: t2(`world.${w.id}` as Key)[0] })}</div><div class="m">${t2(`world.${w.id}` as Key)[1]}</div></div><div class="grow"></div><div class="muted" title="${t('map.secretHint')}">⭐ ${stars}/60 · <span class="${state.save.dex.includes(w.secret) ? '' : 'dim-secret'}">${em(w.secret, 20)}</span></div></div>
         <div class="wprog"><i style="width:${Math.round((stars / 60) * 100)}%"></i></div>
         <div class="path">${nodes}</div>
       </section>`;
@@ -76,7 +77,7 @@ export function renderMap(el: HTMLElement, h: MapHandlers): { refresh(): void } 
     el.querySelector('#map-coins')!.textContent = String(state.save.coins);
     (el.querySelector('#daily-badge') as HTMLElement).hidden = !state.dailyAvailable();
     const cur = LEVELS[Math.min(state.save.unlocked, LEVELS.length) - 1]!;
-    el.querySelector('#map-world')!.textContent = `World ${cur.world} · ${WORLDS[cur.world - 1]!.name}`;
+    el.querySelector('#map-world')!.textContent = t('map.world', { n: cur.world, name: t2(`world.${cur.world}` as Key)[0] });
     // scroll current node into view
     requestAnimationFrame(() => body.querySelector('.node.current')?.scrollIntoView({ block: 'center', behavior: built ? 'smooth' : 'auto' }));
   };
