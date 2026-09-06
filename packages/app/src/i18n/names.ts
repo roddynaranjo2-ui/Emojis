@@ -1,0 +1,43 @@
+/** Localised emoji names (144). English lives in content/emojis.ts. */
+export const NAMES_ES: Record<string, string> = {
+  water: 'Agua', fire: 'Fuego', wind: 'Viento', rock: 'Roca', bolt: 'Rayo', snow: 'Nieve', wave: 'Ola', steam: 'Vapor', ice: 'Hielo', volcano: 'Volcán', mountain: 'Montaña', tornado: 'Tornado',
+  cloud: 'Nube', sun: 'Sol', moon: 'Luna', rain: 'Lluvia', sun_cloud: 'Parcialmente nublado', storm: 'Tormenta', snowcloud: 'Nube de nieve', rainbow: 'Arcoíris', fog: 'Niebla', sunrise: 'Amanecer', night: 'Noche', fullmoon: 'Luna llena',
+  seed: 'Brote', herb: 'Hierba', tree: 'Árbol', forest: 'Bosque', blossom: 'Flor', sunflower: 'Girasol', rose: 'Rosa', mushroom: 'Hongo', cactus: 'Cactus', palm: 'Palmera', clover: 'Trébol', leaf: 'Hoja de arce',
+  egg: 'Huevo', chick: 'Pollito', bird: 'Pájaro', eagle: 'Águila', bug: 'Oruga', butterfly: 'Mariposa', fish: 'Pez', dolphin: 'Delfín', whale: 'Ballena', frog: 'Rana', lion: 'León', owl: 'Búho',
+  wheat: 'Trigo', bread: 'Pan', apple: 'Manzana', milk: 'Leche', cheese: 'Queso', icecream: 'Helado', pizza: 'Pizza', cake: 'Pastel', coffee: 'Café', honey: 'Miel', cookie: 'Galleta', sushi: 'Sushi',
+  happy: 'Feliz', sad: 'Triste', angry: 'Enfadado', scared: 'Asustado', sleepy: 'Dormido', love: 'Enamorado', neutral: 'Neutral', pouty: 'Suplicante', bittersweet: 'Agridulce', hot: 'Acalorado', cold: 'Congelado', calm: 'Aliviado',
+  log: 'Tronco', hammer: 'Martillo', house: 'Casa', key: 'Llave', lock: 'Candado', candle: 'Vela', box: 'Caja', gift: 'Regalo', lamp: 'Idea', book: 'Libro', crown: 'Corona', castle: 'Castillo',
+  star: 'Estrella', glowstar: 'Estrella brillante', dizzy: 'Destello', sparkles: 'Chispas', comet: 'Cometa', planet: 'Planeta', earth: 'Tierra', galaxy: 'Galaxia', rocket: 'Cohete', satellite: 'OVNI', telescope: 'Telescopio', sun_face: 'Cara de sol',
+  mindblown: 'Cabeza explotada', starstruck: 'Deslumbrado', devil: 'Diablillo', angel: 'Ángel', woozy: 'Mareado', flushed: 'Sonrojado', eyeroll: 'Ojos en blanco', thinking: 'Pensativo', party: 'Fiesta', sick: 'Enfermo', cool: 'Genial', heartbroken: 'Corazón roto',
+  pumpkin: 'Calabaza', xmastree: 'Árbol de Navidad', fireworks: 'Fuegos artificiales', heartgift: 'Regalo de amor', birthday: 'Cumpleaños', balloon: 'Globo', confetti: 'Confeti', snowman: 'Muñeco de nieve', lantern: 'Farolillo', ghost: 'Fantasma', sparkler: 'Bengala', trophy: 'Trofeo',
+  dragon: 'Dragón', unicorn: 'Unicornio', fairy: 'Hada', genie: 'Genio', mermaid: 'Sirena', wizard: 'Mago', vampire: 'Vampiro', phoenix: 'Fénix', troll: 'Trol', elf: 'Elfo', zombie: 'Zombi', trex: 'T-Rex',
+  crystal: 'Bola de cristal', infinity: 'Infinito', yinyang: 'Yin yang', nazar: 'Ojo turco', alembic: 'Alambique', oldkey: 'Llave antigua', scroll: 'Pergamino', hourglass: 'Reloj de arena', gem: 'Gema', dna: 'ADN', atom: 'Átomo', eye: 'Ojo que todo lo ve',
+};
+export const NAMES_PT: Record<string, string> = {
+  water: 'Água', fire: 'Fogo', wind: 'Vento', rock: 'Pedra', bolt: 'Raio', snow: 'Neve', wave: 'Onda', steam: 'Vapor', ice: 'Gelo', volcano: 'Vulcão', mountain: 'Montanha', tornado: 'Tornado',
+  cloud: 'Nuvem', sun: 'Sol', moon: 'Lua', rain: 'Chuva', sun_cloud: 'Parcialmente nublado', storm: 'Tempestade', snowcloud: 'Nuvem de neve', rainbow: 'Arco-íris', fog: 'Névoa', sunrise: 'Nascer do sol', night: 'Noite', fullmoon: 'Lua cheia',
+  seed: 'Broto', herb: 'Erva', tree: 'Árvore', forest: 'Floresta', blossom: 'Flor', sunflower: 'Girassol', rose: 'Rosa', mushroom: 'Cogumelo', cactus: 'Cacto', palm: 'Palmeira', clover: 'Trevo', leaf: 'Folha de bordo',
+  egg: 'Ovo', chick: 'Pintinho', bird: 'Pássaro', eagle: 'Águia', bug: 'Lagarta', butterfly: 'Borboleta', fish: 'Peixe', dolphin: 'Golfinho', whale: 'Baleia', frog: 'Sapo', lion: 'Leão', owl: 'Coruja',
+  wheat: 'Trigo', bread: 'Pão', apple: 'Maçã', milk: 'Leite', cheese: 'Queijo', icecream: 'Sorvete', pizza: 'Pizza', cake: 'Bolo', coffee: 'Café', honey: 'Mel', cookie: 'Biscoito', sushi: 'Sushi',
+  happy: 'Feliz', sad: 'Triste', angry: 'Bravo', scared: 'Assustado', sleepy: 'Sonolento', love: 'Apaixonado', neutral: 'Neutro', pouty: 'Suplicante', bittersweet: 'Agridoce', hot: 'Com calor', cold: 'Congelado', calm: 'Aliviado',
+  log: 'Tronco', hammer: 'Martelo', house: 'Casa', key: 'Chave', lock: 'Cadeado', candle: 'Vela', box: 'Caixa', gift: 'Presente', lamp: 'Ideia', book: 'Livro', crown: 'Coroa', castle: 'Castelo',
+  star: 'Estrela', glowstar: 'Estrela brilhante', dizzy: 'Brilho', sparkles: 'Faíscas', comet: 'Cometa', planet: 'Planeta', earth: 'Terra', galaxy: 'Galáxia', rocket: 'Foguete', satellite: 'OVNI', telescope: 'Telescópio', sun_face: 'Cara de sol',
+  mindblown: 'Cabeça explodindo', starstruck: 'Deslumbrado', devil: 'Diabinho', angel: 'Anjo', woozy: 'Tonto', flushed: 'Corado', eyeroll: 'Revirando os olhos', thinking: 'Pensativo', party: 'Festa', sick: 'Enjoado', cool: 'Legal', heartbroken: 'Coração partido',
+  pumpkin: 'Abóbora', xmastree: 'Árvore de Natal', fireworks: 'Fogos de artifício', heartgift: 'Presente de amor', birthday: 'Aniversário', balloon: 'Balão', confetti: 'Confete', snowman: 'Boneco de neve', lantern: 'Lanterna', ghost: 'Fantasma', sparkler: 'Estrelinha', trophy: 'Troféu',
+  dragon: 'Dragão', unicorn: 'Unicórnio', fairy: 'Fada', genie: 'Gênio', mermaid: 'Sereia', wizard: 'Mago', vampire: 'Vampiro', phoenix: 'Fênix', troll: 'Troll', elf: 'Elfo', zombie: 'Zumbi', trex: 'T-Rex',
+  crystal: 'Bola de cristal', infinity: 'Infinito', yinyang: 'Yin yang', nazar: 'Olho grego', alembic: 'Alambique', oldkey: 'Chave antiga', scroll: 'Pergaminho', hourglass: 'Ampulheta', gem: 'Gema', dna: 'DNA', atom: 'Átomo', eye: 'Olho que tudo vê',
+};
+export const NAMES_FR: Record<string, string> = {
+  water: 'Eau', fire: 'Feu', wind: 'Vent', rock: 'Rocher', bolt: 'Éclair', snow: 'Neige', wave: 'Vague', steam: 'Vapeur', ice: 'Glace', volcano: 'Volcan', mountain: 'Montagne', tornado: 'Tornade',
+  cloud: 'Nuage', sun: 'Soleil', moon: 'Lune', rain: 'Pluie', sun_cloud: 'Éclaircies', storm: 'Orage', snowcloud: 'Nuage de neige', rainbow: 'Arc-en-ciel', fog: 'Brouillard', sunrise: 'Aube', night: 'Nuit', fullmoon: 'Pleine lune',
+  seed: 'Pousse', herb: 'Herbe', tree: 'Arbre', forest: 'Forêt', blossom: 'Fleur', sunflower: 'Tournesol', rose: 'Rose', mushroom: 'Champignon', cactus: 'Cactus', palm: 'Palmier', clover: 'Trèfle', leaf: 'Feuille d’érable',
+  egg: 'Œuf', chick: 'Poussin', bird: 'Oiseau', eagle: 'Aigle', bug: 'Chenille', butterfly: 'Papillon', fish: 'Poisson', dolphin: 'Dauphin', whale: 'Baleine', frog: 'Grenouille', lion: 'Lion', owl: 'Hibou',
+  wheat: 'Blé', bread: 'Pain', apple: 'Pomme', milk: 'Lait', cheese: 'Fromage', icecream: 'Glace', pizza: 'Pizza', cake: 'Gâteau', coffee: 'Café', honey: 'Miel', cookie: 'Biscuit', sushi: 'Sushi',
+  happy: 'Heureux', sad: 'Triste', angry: 'Fâché', scared: 'Effrayé', sleepy: 'Endormi', love: 'Amoureux', neutral: 'Neutre', pouty: 'Suppliant', bittersweet: 'Doux-amer', hot: 'En sueur', cold: 'Gelé', calm: 'Soulagé',
+  log: 'Bûche', hammer: 'Marteau', house: 'Maison', key: 'Clé', lock: 'Cadenas', candle: 'Bougie', box: 'Boîte', gift: 'Cadeau', lamp: 'Idée', book: 'Livre', crown: 'Couronne', castle: 'Château',
+  star: 'Étoile', glowstar: 'Étoile brillante', dizzy: 'Éclat', sparkles: 'Étincelles', comet: 'Comète', planet: 'Planète', earth: 'Terre', galaxy: 'Galaxie', rocket: 'Fusée', satellite: 'OVNI', telescope: 'Télescope', sun_face: 'Soleil souriant',
+  mindblown: 'Tête explosée', starstruck: 'Ébloui', devil: 'Diablotin', angel: 'Ange', woozy: 'Étourdi', flushed: 'Rougissant', eyeroll: 'Yeux au ciel', thinking: 'Pensif', party: 'Fête', sick: 'Malade', cool: 'Cool', heartbroken: 'Cœur brisé',
+  pumpkin: 'Citrouille', xmastree: 'Sapin de Noël', fireworks: 'Feux d’artifice', heartgift: 'Cadeau d’amour', birthday: 'Anniversaire', balloon: 'Ballon', confetti: 'Confettis', snowman: 'Bonhomme de neige', lantern: 'Lanterne', ghost: 'Fantôme', sparkler: 'Cierge magique', trophy: 'Trophée',
+  dragon: 'Dragon', unicorn: 'Licorne', fairy: 'Fée', genie: 'Génie', mermaid: 'Sirène', wizard: 'Sorcier', vampire: 'Vampire', phoenix: 'Phénix', troll: 'Troll', elf: 'Elfe', zombie: 'Zombie', trex: 'T-Rex',
+  crystal: 'Boule de cristal', infinity: 'Infini', yinyang: 'Yin yang', nazar: 'Œil bleu', alembic: 'Alambic', oldkey: 'Vieille clé', scroll: 'Parchemin', hourglass: 'Sablier', gem: 'Gemme', dna: 'ADN', atom: 'Atome', eye: 'Œil omniscient',
+};

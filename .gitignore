@@ -1,0 +1,26 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.vite/
+# generated atlas (rebuilt in CI from noto-emoji)
+packages/app/public/atlas/
+.noto-cache/
+# capacitor: the android project IS committed (icons, splash, manifest tweaks); only build outputs are ignored
+packages/app/android/app/build/
+packages/app/android/build/
+packages/app/android/.gradle/
+packages/app/android/.idea/
+packages/app/android/local.properties
+packages/app/android/app/src/main/assets/public/
+packages/app/android/app/src/main/assets/capacitor.config.json
+packages/app/android/app/src/main/assets/capacitor.plugins.json
+packages/app/android/capacitor-cordova-android-plugins/
+packages/app/ios/App/Pods/
+packages/app/ios/App/App/public/
+packages/app/ios/App/App/capacitor.config.json
+packages/app/ios/App/build/
+.env
+packages/app/android/keystore.properties
+packages/app/android/release.keystore

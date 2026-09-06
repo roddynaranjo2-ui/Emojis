@@ -1,0 +1,33 @@
+name: Android APK (Capacitor)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: android-actions/setup-android@v3
+      - run: npm ci
+      - run: npm run build
+      - name: Sync web assets + plugins into the committed Android project
+        working-directory: packages/app
+        run: npx cap sync android
+      - working-directory: packages/app/android
+        run: chmod +x gradlew && ./gradlew assembleDebug bundleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: emojiverse-debug-apk
+          path: packages/app/android/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: emojiverse-release-aab-unsigned
+          path: packages/app/android/app/build/outputs/bundle/release/app-release.aab

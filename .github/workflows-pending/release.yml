@@ -1,0 +1,93 @@
+name: Release (signed Android AAB/APK + PWA + iOS archive)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  web:
+    name: PWA build + GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint && npm run typecheck && npm test
+      - run: npm run build
+      - run: cd packages/app/dist && zip -qr ../../../emojiverse-pwa-${{ github.ref_name }}.zip .
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+          files: emojiverse-pwa-${{ github.ref_name }}.zip
+
+  android:
+    name: Android — signed AAB + APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    needs: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: android-actions/setup-android@v3
+      - run: npm ci && npm run build
+      - working-directory: packages/app
+        run: npx cap sync android
+      - name: Decode keystore
+        if: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
+        working-directory: packages/app/android
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > release.keystore
+          cat > keystore.properties <<EOF2
+          storeFile=../release.keystore
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF2
+      - name: Build
+        working-directory: packages/app/android
+        run: chmod +x gradlew && ./gradlew assembleDebug bundleRelease assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ github.ref_name }}
+          path: |
+            packages/app/android/app/build/outputs/apk/debug/app-debug.apk
+            packages/app/android/app/build/outputs/apk/release/*.apk
+            packages/app/android/app/build/outputs/bundle/release/*.aab
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            packages/app/android/app/build/outputs/apk/release/*.apk
+            packages/app/android/app/build/outputs/bundle/release/*.aab
+
+  ios:
+    name: iOS — Xcode archive (unsigned)
+    runs-on: macos-14
+    timeout-minutes: 40
+    needs: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci && npm run build
+      - working-directory: packages/app
+        run: test -d ios || npx cap add ios
+      - working-directory: packages/app
+        run: npx cap sync ios
+      - name: Archive (no signing — sign locally or add APPLE_* secrets + fastlane)
+        working-directory: packages/app/ios/App
+        run: xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos -archivePath $PWD/build/App.xcarchive CODE_SIGNING_ALLOWED=NO archive
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-xcarchive-${{ github.ref_name }}
+          path: packages/app/ios/App/build/App.xcarchive

@@ -1,0 +1,53 @@
+{
+  "name": "emojiverse",
+  "private": true,
+  "version": "0.4.0",
+  "description": "EMOJIVERSE \u2014 match-3 evolution + alchemy discovery, built 100% from Google Noto Color Emoji",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "atlas": "tsx tools/build-atlas.ts",
+    "validate:content": "tsx packages/content/src/validate.ts",
+    "lint": "eslint packages tools --ext .ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "sim": "tsx tools/simulate.ts",
+    "dev": "npm run atlas && vite --config packages/app/vite.config.ts",
+    "build": "npm run atlas && npm run validate:content && NODE_OPTIONS=--max-old-space-size=700 vite build --config packages/app/vite.config.ts",
+    "preview": "vite preview --config packages/app/vite.config.ts --host 0.0.0.0 --port 4173",
+    "cap:sync": "npx cap sync",
+    "e2e": "python3 tools/e2e/smoke.py",
+    "serve:dist": "python3 -m http.server 4173 --bind 0.0.0.0 -d packages/app/dist",
+    "tune": "tsx tools/tune.ts",
+    "bump": "tsx tools/bump-version.ts"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.0",
+    "@types/node": "^22.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^8.57.0",
+    "sharp": "^0.33.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0",
+    "vite-plugin-pwa": "^0.20.0",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/app": "^6.0.3",
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/haptics": "^6.0.0",
+    "@capacitor/ios": "^6.2.2",
+    "@capacitor/splash-screen": "^6.0.4",
+    "@capacitor/status-bar": "^6.0.3",
+    "phaser": "^3.85.0"
+  }
+}
