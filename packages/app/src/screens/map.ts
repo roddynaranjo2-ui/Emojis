@@ -1,9 +1,10 @@
 import { em } from '@emojiverse/ui';
-import { LEVELS, WORLDS, type LevelDef } from '@emojiverse/content';
+import { LEVELS, WORLDS, liveEvent, EVENT_WEEK_MS, type LevelDef } from '@emojiverse/content';
+import { fmtCountdown } from './event';
 import { state, MAX_LIVES } from '../state';
 import { fmtTime } from '../router';
 
-export interface MapHandlers { onLevel(l: LevelDef): void; onDex(): void; onLab(): void; onShop(): void; onSettings(): void; onDaily(): void; onLives(): void }
+export interface MapHandlers { onLevel(l: LevelDef): void; onDex(): void; onLab(): void; onShop(): void; onSettings(): void; onDaily(): void; onLives(): void; onEvent(): void }
 
 export function renderMap(el: HTMLElement, h: MapHandlers): { refresh(): void } {
   el.innerHTML = `
@@ -30,8 +31,18 @@ export function renderMap(el: HTMLElement, h: MapHandlers): { refresh(): void } 
   const body = el.querySelector('#map-body') as HTMLElement;
   let built = false;
 
+  const eventBanner = () => {
+    const { event, endsAt } = liveEvent();
+    const p = state.eventProgress(event.id, Math.floor(Date.now() / EVENT_WEEK_MS));
+    const unlocked = state.save.unlocked >= 6; // events open after the first 5 levels
+    return `<button class="glass ev-banner ${unlocked ? '' : 'locked'}" id="map-event" style="--ev-a:${event.palette[0]};--ev-b:${event.palette[1]}">
+      <span class="g">${event.glyph}</span>
+      <span class="t"><b>${event.name}</b><small>${unlocked ? `${event.tagline} · ${p.cleared}/8` : 'Unlocks at level 6'}</small></span>
+      <span class="timer">⏳ ${fmtCountdown(endsAt - Date.now())}</span>
+    </button>`;
+  };
   const build = () => {
-    body.innerHTML = WORLDS.map((w) => {
+    body.innerHTML = eventBanner() + WORLDS.map((w) => {
       const lv = LEVELS.filter((l) => l.world === w.id);
       const stars = lv.reduce((a, l) => a + (state.save.stars[l.id] ?? 0), 0);
       const nodes = lv.map((l) => {
@@ -42,7 +53,7 @@ export function renderMap(el: HTMLElement, h: MapHandlers): { refresh(): void } 
         return `<div class="node ${cls} ${l.difficulty === 'boss' ? 'boss' : ''}" data-id="${l.id}">${tag}<button aria-label="Level ${l.number}">${cls === 'locked' ? '🔒' : l.difficulty === 'boss' ? l.glyph : l.number}</button><div class="stars">${cls === 'locked' ? '' : starHtml}</div><div class="lvl">${l.difficulty === 'boss' ? `Lv ${l.number}` : l.name}</div></div>`;
       }).join('');
       return `<section class="world" data-world="${w.id}" style="background:linear-gradient(180deg, ${w.palette[0]}33, ${w.palette[1]}22)">
-        <div class="wtitle"><span class="g">${w.glyph}</span><div><div class="n">World ${w.id} · ${w.name}</div><div class="m">${w.mood}</div></div><div class="grow"></div><div class="muted">⭐ ${stars}/60</div></div>
+        <div class="wtitle"><span class="g">${w.glyph}</span><div><div class="n">World ${w.id} · ${w.name}</div><div class="m">${w.mood}</div></div><div class="grow"></div><div class="muted" title="All 60 stars discover a secret emoji">⭐ ${stars}/60 · <span class="${state.save.dex.includes(w.secret) ? '' : 'dim-secret'}">${em(w.secret, 20)}</span></div></div>
         <div class="wprog"><i style="width:${Math.round((stars / 60) * 100)}%"></i></div>
         <div class="path">${nodes}</div>
       </section>`;
@@ -52,6 +63,7 @@ export function renderMap(el: HTMLElement, h: MapHandlers): { refresh(): void } 
       if (l.number > state.save.unlocked) { n.classList.add('wiggle'); setTimeout(() => n.classList.remove('wiggle'), 400); return; }
       h.onLevel(l);
     }));
+    body.querySelector('#map-event')!.addEventListener('click', () => { if (state.save.unlocked >= 6) h.onEvent(); else { const b = body.querySelector('#map-event')!; b.classList.add('wiggle'); setTimeout(() => b.classList.remove('wiggle'), 400); } });
     built = true;
   };
 

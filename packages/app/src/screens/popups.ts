@@ -1,5 +1,5 @@
 import { em } from '@emojiverse/ui';
-import { EMOJI_BY_ID, WORLDS, type LevelDef, type Mechanic } from '@emojiverse/content';
+import { EMOJI_BY_ID, WORLDS, EVENT_BY_ID, type LevelDef, type Mechanic } from '@emojiverse/content';
 import { state, PRICES, MAX_LIVES, type BoosterKind } from '../state';
 import { openModal, closeModal, openSheet, fmtTime } from '../router';
 
@@ -15,13 +15,14 @@ export function objectiveHtml(o: { type: string; target?: string; amount: number
 /** Pre-level sheet: goals, moves, difficulty, booster selection. Resolves with chosen boosters or null. */
 export function showLevelSheet(level: LevelDef): Promise<Array<'rocket' | 'bomb' | 'wild'> | null> {
   return new Promise((resolve) => {
-    const w = WORLDS[level.world - 1]!;
+    const ev = level.event ? EVENT_BY_ID[level.event] : undefined;
+    const w = ev ? { glyph: ev.glyph } : WORLDS[level.world - 1]!;
     const diffTag = level.difficulty === 'boss' ? '<span class="tag boss" style="position:static">👑 boss</span>' : level.difficulty === 'hard' ? '<span class="tag" style="position:static">🔥 hard</span>' : '';
     const boosters: Array<{ k: 'rocket' | 'bomb' | 'wild'; e: string }> = [{ k: 'rocket', e: 'sp_rocket' }, { k: 'bomb', e: 'sp_bomb' }, { k: 'wild', e: 'sp_wild' }];
     const chosen = new Set<'rocket' | 'bomb' | 'wild'>();
     const { sheet, close } = openSheet(root(), `
       <div class="center" style="gap:6px">
-        <div class="row" style="justify-content:center;gap:8px"><span style="font-size:34px">${w.glyph}</span><div><div class="h2">Level ${level.number}</div><div class="muted">${level.name} ${diffTag}</div></div></div>
+        <div class="row" style="justify-content:center;gap:8px"><span style="font-size:34px">${w.glyph}</span><div><div class="h2">${ev ? `${ev.name} · Stage ${level.index}` : `Level ${level.number}`}</div><div class="muted">${level.name} ${diffTag}</div></div></div>
         <div class="muted" style="margin-top:8px">${em('ui_target', 20)} Goals</div>
         <div class="goal-list">${level.objectives.map((o) => objectiveHtml(o)).join('')}</div>
         <div class="row" style="justify-content:center;margin-top:6px">${em('ui_moves', 20, 'Moves')}<b>${level.moves} moves</b></div>
@@ -48,14 +49,14 @@ export function showWin(level: LevelDef, stars: number, score: number, coins: nu
   const news = newEmojis.length ? `<div class="muted" style="margin-top:6px">${em('ui_new', 20)} discovered</div><div class="row" style="justify-content:center;gap:6px;flex-wrap:wrap">${newEmojis.map((e) => em(e, 44)).join('')}</div>` : '';
   const m = openModal(root(), `
     <span class="hero">${stars >= 3 ? '🤩' : stars === 2 ? '😄' : '🙂'}</span>
-    <div class="title">Level ${level.number} complete!</div>
+    <div class="title">${level.event ? `Stage ${level.index} complete!` : `Level ${level.number} complete!`}</div>
     <div class="stars">${starsHtml}</div>
     <div class="sub">${em('ui_star', 20)} ${score.toLocaleString()} ${level.difficulty === 'boss' ? '· 👑 boss defeated' : ''}</div>
     <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><div class="glass pill">${em('ui_coin', 28)}<span class="num">+${coins}</span></div>${booster}</div>
     ${news}
     <div class="row" style="margin-top:14px">
-      <button class="ebtn cta ghost" id="w-map">${em('ui_map', 28, 'Map')}<span>Map</span></button>
-      <button class="ebtn cta green grow" id="w-next">${em('ui_play', 28, 'Next')}<span>Next level</span></button>
+      <button class="ebtn cta ghost" id="w-map">${em('ui_map', 28, 'Map')}<span>${level.event ? 'Event' : 'Map'}</span></button>
+      <button class="ebtn cta green grow" id="w-next">${em('ui_play', 28, 'Next')}<span>${level.event ? (level.index < 8 ? 'Next stage' : 'Rewards') : 'Next level'}</span></button>
     </div>`);
   m.querySelector('#w-next')!.addEventListener('click', () => { closeModal(); onNext(); });
   m.querySelector('#w-map')!.addEventListener('click', () => { closeModal(); onMap(); });

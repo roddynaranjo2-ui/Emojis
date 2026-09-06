@@ -38,6 +38,8 @@ export interface LevelDef {
   introduces?: Mechanic;
   /** rewards on first clear */
   reward: { coins: number; booster?: 'hammer' | 'shuffle' | 'rocket' | 'bomb' | 'wild' };
+  /** set on vault-event stages (world = 0) */
+  event?: 'emotions2' | 'festive' | 'mythic' | 'arcane';
 }
 
 export interface WorldDef {
@@ -48,16 +50,18 @@ export interface WorldDef {
   targets: string[];
   mechanic: Mechanic;
   bossGlyph: string;
+  /** discovered when the player earns all 60 ⭐ of the world */
+  secret: string;
 }
 
 export const WORLDS: WorldDef[] = [
-  { id: 1, glyph: '😀', name: 'Joy',        mood: 'Everything begins with a smile', palette: ['#FFE29A', '#FFB86B'], pool: ['water', 'fire', 'seed', 'happy', 'star'],        targets: ['herb', 'wave', 'love'],           mechanic: 'rocket',  bossGlyph: '🌞' },
-  { id: 2, glyph: '😢', name: 'Melancholy', mood: 'Rain makes the garden grow',     palette: ['#B8C6FF', '#8FA3E6'], pool: ['water', 'sad', 'seed', 'cloud', 'egg', 'star'],  targets: ['rain', 'pouty', 'herb'],          mechanic: 'rock',    bossGlyph: '⛈️' },
-  { id: 3, glyph: '😡', name: 'Fury',       mood: 'Heat forges everything',         palette: ['#FF9A6B', '#E0523A'], pool: ['fire', 'angry', 'rock', 'wheat', 'egg', 'star'], targets: ['volcano', 'hot', 'bread'],        mechanic: 'ice',     bossGlyph: '🌋' },
-  { id: 4, glyph: '😴', name: 'Dream',      mood: 'Night is full of stars',         palette: ['#6C63FF', '#2B2A5A'], pool: ['sleepy', 'star', 'moon', 'milk', 'bug', 'snow'], targets: ['glowstar', 'night', 'cheese'],    mechanic: 'dust',    bossGlyph: '🌕' },
-  { id: 5, glyph: '😱', name: 'Fear',       mood: 'What hides in the fog?',         palette: ['#5E3A8C', '#1F1233'], pool: ['scared', 'snow', 'log', 'box', 'bolt', 'fish'],  targets: ['cold', 'hammer', 'ice'],          mechanic: 'cage',    bossGlyph: '👻' },
-  { id: 6, glyph: '🥰', name: 'Love',       mood: 'Two smiles make a heart',        palette: ['#FFC0CB', '#FF7DA0'], pool: ['happy', 'bug', 'milk', 'egg', 'seed', 'water'],  targets: ['love', 'butterfly', 'cheese'],  mechanic: 'wild',    bossGlyph: '💝' },
-  { id: 7, glyph: '🤯', name: 'Wonder',     mood: 'Everything connects',            palette: ['#8EF6E4', '#B388FF'], pool: ['star', 'fire', 'water', 'rock', 'bolt', 'wind'], targets: ['glowstar', 'planet', 'storm'],    mechanic: 'synergy', bossGlyph: '🌌' },
+  { id: 1, glyph: '😀', name: 'Joy',        mood: 'Everything begins with a smile', palette: ['#FFE29A', '#FFB86B'], pool: ['water', 'fire', 'seed', 'happy', 'star'],        targets: ['herb', 'wave', 'love'],           mechanic: 'rocket',  bossGlyph: '🌞', secret: 'sun_face' },
+  { id: 2, glyph: '😢', name: 'Melancholy', mood: 'Rain makes the garden grow',     palette: ['#B8C6FF', '#8FA3E6'], pool: ['water', 'sad', 'seed', 'cloud', 'egg', 'star'],  targets: ['rain', 'pouty', 'herb'],          mechanic: 'rock',    bossGlyph: '⛈️', secret: 'rainbow' },
+  { id: 3, glyph: '😡', name: 'Fury',       mood: 'Heat forges everything',         palette: ['#FF9A6B', '#E0523A'], pool: ['fire', 'angry', 'rock', 'wheat', 'egg', 'star'], targets: ['volcano', 'hot', 'bread'],        mechanic: 'ice',     bossGlyph: '🌋', secret: 'lion' },
+  { id: 4, glyph: '😴', name: 'Dream',      mood: 'Night is full of stars',         palette: ['#6C63FF', '#2B2A5A'], pool: ['sleepy', 'star', 'moon', 'milk', 'bug', 'snow'], targets: ['glowstar', 'night', 'cheese'],    mechanic: 'dust',    bossGlyph: '🌕', secret: 'fullmoon' },
+  { id: 5, glyph: '😱', name: 'Fear',       mood: 'What hides in the fog?',         palette: ['#5E3A8C', '#1F1233'], pool: ['scared', 'snow', 'log', 'box', 'bolt', 'fish'],  targets: ['cold', 'hammer', 'ice'],          mechanic: 'cage',    bossGlyph: '👻', secret: 'castle' },
+  { id: 6, glyph: '🥰', name: 'Love',       mood: 'Two smiles make a heart',        palette: ['#FFC0CB', '#FF7DA0'], pool: ['happy', 'bug', 'milk', 'egg', 'seed', 'water'],  targets: ['love', 'butterfly', 'cheese'],  mechanic: 'wild',    bossGlyph: '💝', secret: 'rose' },
+  { id: 7, glyph: '🤯', name: 'Wonder',     mood: 'Everything connects',            palette: ['#8EF6E4', '#B388FF'], pool: ['star', 'fire', 'water', 'rock', 'bolt', 'wind'], targets: ['glowstar', 'planet', 'storm'],    mechanic: 'synergy', bossGlyph: '🌌', secret: 'galaxy' },
 ];
 
 const NAMES: Record<number, string[]> = {

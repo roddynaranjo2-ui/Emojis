@@ -2,7 +2,7 @@
   "name": "emojiverse",
   "private": true,
   "version": "0.1.0",
-  "description": "EMOJIVERSE \u2014 match-3 evolution + alchemy discovery, built 100% from Google Noto Color Emoji",
+  "description": "EMOJIVERSE — match-3 evolution + alchemy discovery, built 100% from Google Noto Color Emoji",
   "type": "module",
   "workspaces": [
     "packages/*"
@@ -27,22 +27,26 @@
     "tune": "tsx tools/tune.ts"
   },
   "devDependencies": {
+    "@capacitor/cli": "^6.1.0",
     "@types/node": "^22.5.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^8.57.0",
+    "sharp": "^0.33.5",
     "tsx": "^4.19.0",
     "typescript": "^5.5.0",
     "vite": "^5.4.0",
     "vite-plugin-pwa": "^0.20.0",
-    "vitest": "^2.0.0",
-    "sharp": "^0.33.5",
-    "@capacitor/cli": "^6.1.0"
+    "vitest": "^2.0.0"
   },
   "dependencies": {
-    "phaser": "^3.85.0",
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/app": "^6.0.3",
     "@capacitor/core": "^6.1.0",
     "@capacitor/haptics": "^6.0.0",
-    "@capacitor/android": "^6.1.0"
+    "@capacitor/ios": "^6.2.2",
+    "@capacitor/splash-screen": "^6.0.4",
+    "@capacitor/status-bar": "^6.0.3",
+    "phaser": "^3.85.0"
   }
 }

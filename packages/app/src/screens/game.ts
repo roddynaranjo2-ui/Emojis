@@ -1,22 +1,25 @@
 import Phaser from 'phaser';
 import { BoardScene, sfx, haptics, music, type HudBridge, type SceneData } from '@emojiverse/game';
 import { Hud, em } from '@emojiverse/ui';
-import { EMOJI_BY_ID, WORLDS, NEXT_TIER, type LevelDef } from '@emojiverse/content';
+import { EMOJI_BY_ID, WORLDS, LEVELS, NEXT_TIER, EVENT_BY_ID, eventNextTier, type LevelDef } from '@emojiverse/content';
 import { DEFAULT_RULES, type RulesConfig } from '@emojiverse/core';
 import { state, PRICES } from '../state';
 import { openModal, closeModal, toast } from '../router';
 import { showWin, showLose, showTutorial } from './popups';
+import { awardAchievements } from '../achievements';
 
 export interface GameHandlers {
   onExitToMap(): void;
   onRetry(level: LevelDef): void;
   onNext(level: LevelDef): void;
+  /** called right after a win is recorded (before the popup) */
+  onWin?(level: LevelDef, stars: number): void;
 }
 
 type Progress = Array<{ target?: string; type: string; current: number; amount: number; done: boolean }>;
 type PreBooster = 'rocket' | 'bomb' | 'wild';
 
-const rules: RulesConfig = { ...DEFAULT_RULES, nextTier: NEXT_TIER };
+const BASE_RULES: RulesConfig = { ...DEFAULT_RULES, nextTier: NEXT_TIER };
 
 /**
  * GameScreen — owns the Phaser.Game lifecycle for one level attempt, the HUD,
@@ -87,11 +90,13 @@ export class GameScreen {
   async start(level: LevelDef, preBoosters: PreBooster[] = []): Promise<void> {
     this.destroyGame();
     this.level = level; this.ended = false; this.hammerOn = false; this.lastProgress = [];
-    const world = WORLDS[level.world - 1]!;
+    const ev = level.event ? EVENT_BY_ID[level.event] : undefined;
+    const worldGlyph = ev ? ev.glyph : WORLDS[level.world - 1]!.glyph;
+    const rules: RulesConfig = ev ? { ...DEFAULT_RULES, nextTier: eventNextTier(ev) } : BASE_RULES;
 
     this.hud.setLives(state.save.lives); this.hud.setCoins(state.save.coins); this.hud.setMuted(!state.save.settings.sfx);
     this.refreshBoosterBar();
-    music.start(level.world);
+    music.start(ev ? ev.theme : level.world);
 
     // consume pre-level boosters (already validated by the level sheet)
     const consumed: PreBooster[] = [];
@@ -105,11 +110,11 @@ export class GameScreen {
     }
 
     const showHand = level.number === 1 && !state.seenTutorial('hand');
-    this.hud.intro(EMOJI_BY_ID[level.spawnPool[2]!]?.glyph ?? level.glyph, `${world.glyph} ${level.name}`);
+    this.hud.intro(EMOJI_BY_ID[level.spawnPool[2]!]?.glyph ?? level.glyph, `${worldGlyph} ${level.name}`);
 
     const bridge: HudBridge = {
       onState: (s) => { this.lastProgress = s.progress; this.hud.update(s); },
-      onCombo: (c) => this.hud.showCombo(c),
+      onCombo: (c) => { this.hud.showCombo(c); if (c > state.save.stats.combosMax) { state.save.stats.combosMax = c; state.commit(); } },
       onFirstMove: () => { if (showHand) state.markTutorial('hand'); },
       onBoosterUsed: (kind) => { if (kind === 'hammer') { state.useBooster('hammer'); this.hammerOn = false; this.refreshBoosterBar(); } },
       onDiscover: (emoji) => {
@@ -146,7 +151,15 @@ export class GameScreen {
     if (won) {
       const before = new Set(state.save.dex);
       const { firstClear, coins } = state.recordWin(level.id, level.number, stars, score, level.reward);
+      // world secret: all 60 stars of a world unlocks its legendary
+      if (!level.event) {
+        const world = WORLDS[level.world - 1]!;
+        const ids = LEVELS.filter((l) => l.world === level.world).map((l) => l.id);
+        if (state.worldStars(level.world, ids) >= 60 && state.discover(world.secret)) { state.addToLab(world.secret); sfx.discover(3); haptics.discover(3); }
+      }
       const newEmojis = state.save.dex.filter((e) => !before.has(e));
+      this.h.onWin?.(level, stars);
+      setTimeout(awardAchievements, 900);
       this.hud.setCoins(state.save.coins);
       showWin(level, stars, score, coins, firstClear, newEmojis,
         () => this.h.onNext(level),
@@ -171,7 +184,7 @@ export class GameScreen {
     const m = openModal(this.el, `
       <span class="hero">⏸️</span>
       <div class="title">Paused</div>
-      <div class="sub">Level ${level.number} · ${level.name}</div>
+      <div class="sub">${level.event ? `Stage ${level.index}` : `Level ${level.number}`} · ${level.name}</div>
       <button class="ebtn cta" id="p-resume" style="width:100%">${em('ui_play', 28)}<span>Resume</span></button>
       <div class="row" style="margin-top:10px">
         <button class="ebtn cta ghost" id="p-map">${em('ui_map', 28, 'Map')}<span>Quit</span></button>
@@ -181,6 +194,9 @@ export class GameScreen {
     m.querySelector('#p-retry')!.addEventListener('click', () => { closeModal('pause'); this.ended = true; this.h.onRetry(level); });
     m.querySelector('#p-map')!.addEventListener('click', () => { closeModal('pause'); this.ended = true; toast(`${em('ui_heart', 20)} life kept — see you on the map`); this.h.onExitToMap(); });
   }
+
+  /** Resume a paused board (native back button closes the pause modal). */
+  resume(): void { this.game?.scene.resume('board'); }
 
   /** Called when navigating away; frees the WebGL context. */
   destroy(): void { this.destroyGame(); music.stop(); }

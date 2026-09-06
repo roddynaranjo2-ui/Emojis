@@ -124,6 +124,34 @@ async def main() -> int:
         await page.click("#nav-daily")
         await page.wait_for_timeout(400)
         await shot(page, "14-daily")
+        await page.evaluate("() => document.getElementById('modal')?.remove()")
+
+        # 8. vault event: banner → event screen → stage 1 → win → milestone
+        await page.evaluate("() => { const a = window.__app; a.state.save.unlocked = Math.max(a.state.save.unlocked, 6); a.state.commit(); a.router.go('splash'); a.router.go('map'); }")
+        await page.wait_for_timeout(300)
+        await page.click("#map-event")
+        await page.wait_for_selector("#event.active"); await page.wait_for_timeout(450)
+        await shot(page, "15-event")
+        await page.click("#event .node.current", force=True)
+        await page.wait_for_selector("#sheet"); await page.click("#ls-play")
+        await page.wait_for_selector("#board canvas"); await page.wait_for_timeout(1500)
+        for _ in range(80):
+            if await page.evaluate("() => window.__scene()?.status") != "playing": break
+            await page.evaluate("() => window.__scene().debugPlayHint()"); await page.wait_for_timeout(200)
+        await page.wait_for_timeout(2200); await page.wait_for_selector("#modal", timeout=8000)
+        title = await page.inner_text("#modal .title"); print(f"  event stage: {title}")
+        await shot(page, "16-event-stage-end")
+        await page.click("#w-map" if await page.query_selector("#w-map") else "#l-map")
+        await page.wait_for_selector("#event.active"); await page.wait_for_timeout(400)
+        ev = await page.evaluate("() => window.__app.state.save.events"); print(f"  event progress: {ev}")
+        vault = await page.evaluate("() => window.__app.state.save.dex.length"); print(f"  dex after event: {vault}")
+        await page.click("#ev-back"); await page.wait_for_selector("#map.active")
+
+        # 9. achievements visible in options
+        await page.click("#nav-settings"); await page.wait_for_selector("#settings.active"); await page.wait_for_timeout(300)
+        ach = await page.inner_text("#ach-count"); print(f"  achievements: {ach}")
+        await shot(page, "17-achievements")
+        await page.click("#set-back"); await page.wait_for_selector("#map.active")
 
         save = await page.evaluate("() => window.__app.state.save")
         print(f"  save: unlocked={save['unlocked']} coins={save['coins']} lives={save['lives']} dex={len(save['dex'])}")

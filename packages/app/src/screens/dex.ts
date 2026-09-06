@@ -1,5 +1,6 @@
 import { em } from '@emojiverse/ui';
 import { EMOJIS, FAMILIES, RECIPES, EMOJI_BY_ID, type FamilyId } from '@emojiverse/content';
+import { eventForEmoji, liveEvent } from '@emojiverse/content';
 import { state, PRICES } from '../state';
 import { openModal, closeModal, toast } from '../router';
 
@@ -32,7 +33,7 @@ export function renderDex(el: HTMLElement, onBack: () => void): { refresh(): voi
     const f = FAMILIES.find((x) => x.id === fam)!;
     bar.innerHTML = list.map((e) => `<i class="${dex.has(e.id) ? 'on' : ''}"></i>`).join('');
     grid.innerHTML = list.map((e) => {
-      const st = f.status === 'vault' ? 'locked' : dex.has(e.id) ? '' : 'hidden';
+      const st = dex.has(e.id) ? '' : f.status === 'vault' ? 'locked' : 'hidden';
       const isNew = dex.has(e.id) && !seen.has(e.id) && !state.save.tutorialsSeen.includes(`seen:${e.id}`);
       return `<div class="slot ${st} ${e.rarity} ${isNew ? 'new' : ''}" data-id="${e.id}"><span class="g">${em(e.id, 44, e.name)}</span><span class="nm">${st ? (f.status === 'vault' ? 'vault' : '???') : e.name}</span></div>`;
     }).join('');
@@ -50,7 +51,13 @@ function openDetail(id: string, refresh: () => void): void {
   const echoLevel = state.save.echoes[id] ?? 0;
   const rarityLabel = { common: '⚪ Common', rare: '🟢 Rare', epic: '🟣 Epic', legendary: '🟡 Legendary' }[e.rarity];
   let body = '';
-  if (f.status === 'vault') body = `<div class="sub">🔒 This family arrives in a future event.</div>`;
+  if (f.status === 'vault' && !known) {
+    const ev = eventForEmoji(id); const live = liveEvent().event;
+    const chain = ev?.chains.find((c) => c.includes(id)) ?? [];
+    body = `<div class="sub">${rarityLabel} · ${f.name}</div>
+      <div class="glass recipe" style="margin-top:8px">${ev ? `${ev.glyph} <span>Earn it in the <b>${ev.name}</b> event${ev.id === live.id ? ' — <b>live now!</b>' : ''}</span>` : '🔒 <span>Vault</span>'}</div>
+      ${chain.length ? `<div class="muted" style="margin:8px 0 4px">Evolution path</div><div class="glass chain">${chain.map((c, i) => `${i ? '<span class="arr">›</span>' : ''}<span class="${state.save.dex.includes(c) || EMOJI_BY_ID[c]?.status === 'launch' ? '' : 'dim'}">${em(c, 28, EMOJI_BY_ID[c]?.name)}</span>`).join('')}</div>` : ''}`;
+  }
   else if (known) {
     body = `<div class="sub">${rarityLabel} · ${f.name}</div>` + (recipes.length ? `<div class="muted" style="margin:8px 0 4px">Recipes</div><div class="recipe-list">${recipes.map((r) => `<div class="glass recipe">${em(r.a, 28)} <span class="eq">+</span> ${em(r.b, 28)} <span class="eq">=</span> ${em(r.result, 28)}</div>`).join('')}</div>` : `<div class="muted">Evolves on the board by matching 3.</div>`);
   } else {

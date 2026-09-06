@@ -11,6 +11,7 @@ import { EMOJIS, EMOJI_BY_ID, FAMILIES } from './emojis';
 import { CHAINS, NEXT_TIER } from './chains';
 import { RECIPES, recipeKey } from './recipes';
 import { LEVELS } from './levels';
+import { EVENTS, EVENT_LEVELS, EVENT_BY_ID, eventNextTier, VAULT_IDS_CHECK } from './events';
 
 const errors: string[] = [];
 const warnings: string[] = [];
@@ -47,7 +48,8 @@ for (const rc of RECIPES) {
   const av = EMOJI_BY_ID[rc.a]?.status === 'vault', bv = EMOJI_BY_ID[rc.b]?.status === 'vault';
   if (EMOJI_BY_ID[rc.result]?.status === 'vault' && !av && !bv) warn(`Recipe ${k} yields vault emoji ${rc.result} from launch ingredients`);
 }
-for (const lv of LEVELS) {
+for (const lv of [...LEVELS, ...EVENT_LEVELS]) {
+  const nextTier = lv.event ? eventNextTier(EVENT_BY_ID[lv.event]) : NEXT_TIER;
   lv.spawnPool.forEach((id) => ref(id, `level ${lv.id} spawnPool`));
   if (lv.spawnPool.length < 4 || lv.spawnPool.length > 7) fail(`level ${lv.id}: spawnPool size ${lv.spawnPool.length} out of [4,7]`);
   for (const o of lv.objectives) {
@@ -56,7 +58,7 @@ for (const lv of LEVELS) {
     // a collect target must be reachable from the spawn pool by evolution
     if (o.type === 'collect' && o.target) {
       const reach = new Set(lv.spawnPool); let grew = true;
-      while (grew) { grew = false; for (const e of [...reach]) { const n = NEXT_TIER[e]; if (n && !reach.has(n)) { reach.add(n); grew = true; } } }
+      while (grew) { grew = false; for (const e of [...reach]) { const n = nextTier[e]; if (n && !reach.has(n)) { reach.add(n); grew = true; } } }
       if (!reach.has(o.target)) fail(`level ${lv.id}: target '${o.target}' not reachable from spawnPool by evolution`);
     }
   }
@@ -65,6 +67,19 @@ for (const lv of LEVELS) {
     const open = lv.layout.join('').split('').filter((c) => c === '.' || c === 'J' || c === 'K' || c === 'C').length;
     if (open < lv.cols * lv.rows * 0.6) fail(`level ${lv.id}: too few playable cells (${open})`);
   }
+}
+
+// 3b. vault events: every vault emoji belongs to exactly one event chain; chains start from launch pieces
+{
+  const seen = new Map<string, string>();
+  for (const ev of EVENTS) for (const chain of ev.chains) {
+    const base = EMOJI_BY_ID[chain[0]!];
+    if (!base) fail(`event ${ev.id}: unknown chain base ${chain[0]}`);
+    else if (base.status !== 'launch') fail(`event ${ev.id}: chain must start from a launch piece (${chain[0]})`);
+    for (const id of chain) { ref(id, `event ${ev.id} chain`); if (EMOJI_BY_ID[id]?.status === 'vault') { if (seen.has(id) && seen.get(id) !== ev.id) fail(`vault emoji ${id} appears in two events`); seen.set(id, ev.id); } }
+    for (const id of ev.pool) ref(id, `event ${ev.id} pool`);
+  }
+  for (const v of VAULT_IDS_CHECK()) if (!seen.has(v)) fail(`vault emoji ${v} is not obtainable in any event`);
 }
 
 // 4. reachability of launch emojis from tier-0 launch pieces
@@ -86,7 +101,7 @@ const ratio = { physical: pct('physical'), metamorphic: pct('metamorphic'), psyc
 if (Math.abs(ratio.physical - 40) > 12 || Math.abs(ratio.metamorphic - 30) > 12 || Math.abs(ratio.psychological - 30) > 12)
   warn(`Recipe ratio drift: ${JSON.stringify(ratio)} (target 40/30/30)`);
 
-console.log(`📦 content: ${EMOJIS.length} emojis · ${Object.keys(CHAINS).length} chains · ${RECIPES.length} recipes · ${LEVELS.length} levels`);
+console.log(`📦 content: ${EMOJIS.length} emojis · ${Object.keys(CHAINS).length} chains · ${RECIPES.length} recipes · ${LEVELS.length} levels · ${EVENTS.length} events × 8 stages`);
 console.log(`🔬 recipe mix: ${JSON.stringify(ratio)}`);
 for (const w of warnings) console.warn(`⚠️  ${w}`);
 if (errors.length) { for (const e of errors) console.error(`❌ ${e}`); process.exit(1); }

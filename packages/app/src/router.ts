@@ -1,5 +1,5 @@
 /** Minimal screen router: one <section class="screen"> per screen; only one active. */
-export type ScreenId = 'splash' | 'map' | 'game' | 'dex' | 'lab' | 'shop' | 'settings';
+export type ScreenId = 'splash' | 'map' | 'game' | 'dex' | 'lab' | 'shop' | 'settings' | 'event';
 
 export class Router {
   private screens = new Map<ScreenId, HTMLElement>();

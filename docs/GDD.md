@@ -98,6 +98,14 @@ Web Audio synthesis, unlocked on first tap (iOS). Master → compressor so casca
 - Shockwave ring, rocket laser streak, full‑screen flash (≥ 0.6 magnitude).
 - **Dynamic screen shake**: intensity = 0.002 + m²·0.028, duration = 80 + 420·m ms. A 3‑match nudges, a bomb thumps, mega cross rattles.
 
+## 8b. Vault events — the 48 locked emojis
+
+One event is live each ISO week, rotating **Masquerade 🎭 → Fiesta 🎃 → Legends 🐉 → Secrets 🔮**. An event is a mini‑saga of 8 stages (easy → boss) with its own evolution chains that start from launch base pieces and climb into vault emojis (e.g. 🥚 › 🧝 › 🧚 › 🦄 › 🐦‍🔥). Late stages spawn evolved pieces directly so depth‑3 goals stay fair. Stage progress and the 4‑step milestone ladder (coins + boosters) reset with the rotation — **discoveries never do**, so the dex fills across weeks. Events unlock at level 6 and are advertised by a banner on the map with a live countdown; the dex tells you which event yields any locked emoji and shows its evolution path.
+
+## 8c. Achievements & world secrets
+
+17 achievements (wins, stars, dex, recipes, combos, streak, daily) award coins and a toast; they are listed in Options. Earning all 60 ⭐ of a world discovers its legendary secret (🌞 🌈 🦁 🌕 🏰 🌹 🌌), shown dimmed next to the world's star counter as a long‑term goal.
+
 ## 9. Progression & retention
 
 - Saga map of **7 emotional worlds** (😀 😢 😡 😴 😱 🥰 🤯) × 20 levels; every 5th is an "echo level", level 20 is an emotional boss.

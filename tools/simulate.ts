@@ -8,26 +8,27 @@
  *   CI_STRICT_BALANCE=1 fails the run when any level is out of band.
  */
 import { simulateLevel, DEFAULT_RULES } from '../packages/core/src/index';
-import { LEVELS, NEXT_TIER } from '../packages/content/src/index';
+import { LEVELS, NEXT_TIER, EVENT_LEVELS, EVENT_BY_ID, eventNextTier } from '../packages/content/src/index';
 
 const games = Number(process.argv[2] ?? 40);
 const worldFilter = process.argv[3] ? Number(process.argv[3]) : undefined;
 const rules = { ...DEFAULT_RULES, nextTier: NEXT_TIER };
-const levels = LEVELS.filter((l) => !worldFilter || l.world === worldFilter);
+const levels = [...LEVELS, ...EVENT_LEVELS].filter((l) => worldFilter === undefined || l.world === worldFilter);
+const rulesFor = (l: typeof levels[number]) => (l.event ? { ...rules, nextTier: eventNextTier(EVENT_BY_ID[l.event]) } : rules);
 
 let bad = 0;
 const out: string[] = [];
 const byWorld: Record<number, number[]> = {};
 console.log(`🎲 GreedyBot × ${games} games on ${levels.length} levels\n`);
 for (const lv of levels) {
-  const s = simulateLevel(lv, rules, games);
+  const s = simulateLevel(lv, rulesFor(lv), games);
   const isBoss = lv.difficulty === 'boss';
   const free = lv.number <= 3;
   const [lo, hi] = free ? [0.5, 1.01] : isBoss ? [0.15, 0.85] : [0.3, 0.9];
   const ok = s.winRate >= lo && s.winRate <= hi;
   if (!ok) bad++;
   (byWorld[lv.world] ??= []).push(s.winRate);
-  out.push(`${lv.id.padEnd(8)} ${lv.difficulty.padEnd(6)} ${(s.winRate * 100).toFixed(0).padStart(4)}%  score ${String(s.avgScore).padStart(6)}  moves ${String(s.avgMovesUsed).padStart(5)}/${lv.moves}  ${ok ? '✅' : '⚠️'}`);
+  out.push(`${lv.id.padEnd(16)} ${lv.difficulty.padEnd(6)} ${(s.winRate * 100).toFixed(0).padStart(4)}%  score ${String(s.avgScore).padStart(6)}  moves ${String(s.avgMovesUsed).padStart(5)}/${lv.moves}  ${ok ? '✅' : '⚠️'}`);
 }
 console.log(out.join('\n'));
 console.log('\nworld  avg win%');

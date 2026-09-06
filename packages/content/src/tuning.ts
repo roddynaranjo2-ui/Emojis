@@ -141,3 +141,39 @@ export const TUNING: Record<string, number> = {
   "w7-l19": 28,
   "w7-l20": 49
 };
+
+/** Move budgets for vault-event stages (written by tools/tune.ts). */
+export const EVENT_TUNING: Record<string, number> = {
+  "ev-emotions2-1": 17,
+  "ev-emotions2-2": 20,
+  "ev-emotions2-3": 30,
+  "ev-emotions2-4": 34,
+  "ev-emotions2-5": 44,
+  "ev-emotions2-6": 38,
+  "ev-emotions2-7": 33,
+  "ev-emotions2-8": 32,
+  "ev-festive-1": 22,
+  "ev-festive-2": 24,
+  "ev-festive-3": 28,
+  "ev-festive-4": 40,
+  "ev-festive-5": 35,
+  "ev-festive-6": 45,
+  "ev-festive-7": 34,
+  "ev-festive-8": 42,
+  "ev-mythic-1": 22,
+  "ev-mythic-2": 21,
+  "ev-mythic-3": 24,
+  "ev-mythic-4": 42,
+  "ev-mythic-5": 36,
+  "ev-mythic-6": 36,
+  "ev-mythic-7": 36,
+  "ev-mythic-8": 42,
+  "ev-arcane-1": 21,
+  "ev-arcane-2": 22,
+  "ev-arcane-3": 28,
+  "ev-arcane-4": 43,
+  "ev-arcane-5": 33,
+  "ev-arcane-6": 38,
+  "ev-arcane-7": 37,
+  "ev-arcane-8": 37
+};

@@ -76,4 +76,8 @@ Phaser (1.2 MB) is **not** bundled: `rollupOptions.external: ['phaser']`, copied
 
 ## 9. Native shell
 
-Capacitor 6 config in `packages/app/capacitor.config.ts` (`webDir: dist`). `android.yml` (pending activation) produces a debug APK on `v*` tags. iOS requires a macOS runner + signing (Phase 3).
+`packages/app/android/` is a committed Capacitor 6 project (portrait lock, adaptive icon + splash generated from `public/icons/icon-512.png`, versionCode/Name). `npx cap sync android` copies `dist/` and wires the 4 plugins declared in `packages/app/package.json` (App, Haptics, SplashScreen, StatusBar). `src/native.ts` lazy‑imports the plugins only when `Capacitor.isNativePlatform()` so the PWA bundle is unaffected; it maps the Android back button to *close modal → pause → back to map → minimise*, hides the native splash after ours paints and stops music when the app goes to background (also on web via `visibilitychange`). `android.yml` (pending activation) builds `assembleDebug` + `bundleRelease` on `v*` tags; signing needs `KEYSTORE_*` secrets (F4). iOS: `npx cap add ios` on macOS.
+
+## 10. Events
+
+`content/events.ts` defines 4 `EventDef`s; `eventNextTier(ev)` overlays the event chains on `NEXT_TIER` and is passed as `RulesConfig.nextTier` when `level.event` is set, so the core engine needs no changes. Stage levels reuse `LevelDef` (`world: 0`, `number ≥ 1000`, `event` tag); `recordWin` ignores them for saga unlocking. `liveEvent(now)` derives the current event from the epoch week — no server, deterministic for everyone. Progress lives in `save.events[eventId] = { cleared, claimed, week }` and resets when `week` changes.

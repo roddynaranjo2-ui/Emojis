@@ -24,6 +24,11 @@ export interface Save {
   settings: { music: boolean; sfx: boolean; haptics: boolean };
   tutorialsSeen: string[];
   firstRun: boolean;
+  /** vault events: eventId → { stages cleared, milestones claimed, week stamp } */
+  events: Record<string, { cleared: number; claimed: number; week: number }>;
+  achievements: string[];
+  /** total stats for achievements */
+  stats: { wins: number; bombs: number; rockets: number; wilds: number; combosMax: number; mixes: number };
 }
 
 export const MAX_LIVES = 5;
@@ -36,7 +41,7 @@ function fresh(): Save {
   return {
     v: 2, unlocked: 1, stars: {}, best: {}, losses: {}, lives: MAX_LIVES, livesAt: 0, coins: 150,
     boosters: { hammer: 2, shuffle: 1, rocket: 1, bomb: 0, wild: 0 }, dex: [], echoes: {}, labInventory: {}, recipesFound: [],
-    streak: 0, lastDaily: '', dailyDay: 0, settings: { music: true, sfx: true, haptics: true }, tutorialsSeen: [], firstRun: true,
+    streak: 0, lastDaily: '', dailyDay: 0, settings: { music: true, sfx: true, haptics: true }, tutorialsSeen: [], firstRun: true, events: {}, achievements: [], stats: { wins: 0, bombs: 0, rockets: 0, wilds: 0, combosMax: 0, mixes: 0 },
   };
 }
 
@@ -48,6 +53,9 @@ function migrate(raw: unknown): Save {
   // v1 → v2
   if (typeof r.level === 'number') out.unlocked = Math.max(1, r.level + 1);
   if (typeof r.muted === 'boolean') { out.settings.music = !r.muted; out.settings.sfx = !r.muted; }
+  out.events = { ...(r.events ?? {}) };
+  out.achievements = [...(r.achievements ?? [])];
+  out.stats = { ...base.stats, ...(r.stats ?? {}) };
   out.v = 2;
   return out;
 }
@@ -95,12 +103,12 @@ export class GameState {
     s.stars[levelId] = Math.max(s.stars[levelId] ?? 0, stars);
     s.best[levelId] = Math.max(s.best[levelId] ?? 0, score);
     s.losses[levelId] = 0;
-    s.streak++;
+    s.streak++; s.stats.wins++;
     let coins = firstClear ? reward.coins : Math.round(reward.coins * 0.25);
     coins += stars * 5 + Math.min(s.streak, 5) * 4;
     s.coins += coins;
     if (firstClear && reward.booster) s.boosters[reward.booster] = (s.boosters[reward.booster] ?? 0) + 1;
-    if (levelNumber >= s.unlocked) s.unlocked = levelNumber + 1;
+    if (levelNumber < 1000 && levelNumber >= s.unlocked) s.unlocked = levelNumber + 1; // event stages (≥1000) never advance the saga
     this.commit();
     return { firstClear, coins };
   }
@@ -131,6 +139,54 @@ export class GameState {
     this.commit();
     return { day: s.dailyDay, ...r };
   }
+
+  // ── Vault events ─────────────────────────────────────────────────────────
+  eventProgress(id: string, week: number): { cleared: number; claimed: number; week: number } {
+    const cur = this.save.events[id];
+    if (!cur || cur.week !== week) { const fresh = { cleared: 0, claimed: 0, week }; this.save.events[id] = fresh; return fresh; }
+    return cur;
+  }
+  recordEventStage(id: string, week: number, stage: number): boolean {
+    const p = this.eventProgress(id, week);
+    if (stage !== p.cleared + 1) return false;
+    p.cleared = stage; this.commit(); return true;
+  }
+  claimEventMilestone(id: string, week: number, index: number, reward: { coins: number; booster?: BoosterKind }): boolean {
+    const p = this.eventProgress(id, week);
+    if (index !== p.claimed) return false;
+    p.claimed = index + 1; this.save.coins += reward.coins;
+    if (reward.booster) this.save.boosters[reward.booster] = (this.save.boosters[reward.booster] ?? 0) + 1;
+    this.commit(); return true;
+  }
+
+  // ── Achievements ─────────────────────────────────────────────────────────
+  /** returns the ids newly unlocked (caller shows toasts) */
+  checkAchievements(): string[] {
+    const s = this.save; const out: string[] = [];
+    const starsTotal = Object.values(s.stars).reduce((a, b) => a + b, 0);
+    const has = (id: string) => s.achievements.includes(id);
+    const give = (id: string) => { if (!has(id)) { s.achievements.push(id); out.push(id); } };
+    if (s.stats.wins >= 1) give('first_win');
+    if (s.stats.wins >= 25) give('wins_25');
+    if (s.stats.wins >= 100) give('wins_100');
+    if (starsTotal >= 30) give('stars_30');
+    if (starsTotal >= 150) give('stars_150');
+    if (starsTotal >= 420) give('stars_all');
+    if (s.dex.length >= 10) give('dex_10');
+    if (s.dex.length >= 50) give('dex_50');
+    if (s.dex.length >= 96) give('dex_launch');
+    if (s.dex.length >= 144) give('dex_all');
+    if (s.recipesFound.length >= 1) give('mix_1');
+    if (s.recipesFound.length >= 25) give('mix_25');
+    if (s.recipesFound.length >= 71) give('mix_all');
+    if (s.stats.combosMax >= 5) give('combo_5');
+    if (s.stats.combosMax >= 8) give('combo_8');
+    if (s.streak >= 5) give('streak_5');
+    if (s.dailyDay >= 7) give('daily_7');
+    if (out.length) this.commit();
+    return out;
+  }
+  worldStars(world: number, levelIds: string[]): number { return levelIds.reduce((a, id) => a + (this.save.stars[id] ?? 0), 0); }
 
   seenTutorial(id: string): boolean { return this.save.tutorialsSeen.includes(id); }
   markTutorial(id: string): void { if (!this.seenTutorial(id)) { this.save.tutorialsSeen.push(id); this.commit(); } }

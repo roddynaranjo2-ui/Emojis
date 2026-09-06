@@ -1,6 +1,7 @@
 import { em } from '@emojiverse/ui';
 import { EMOJI_BY_ID, findRecipe, recipeKey, RECIPES } from '@emojiverse/content';
 import { state } from '../state';
+import { awardAchievements } from '../achievements';
 import { toast, openModal, closeModal } from '../router';
 import { sfx, haptics } from '@emojiverse/game';
 
@@ -78,7 +79,7 @@ export function renderLab(el: HTMLElement, onBack: () => void, onDiscover: (emoj
       <div class="sub">${em(r.a, 28)} + ${em(r.b, 28)} = ${em(r.result, 28)}${isNewRecipe ? ' · new recipe!' : ''}</div>
       <div class="muted">${{ physical: '🔬 physical', metamorphic: '🦋 metamorphic', psychological: '🧠 psychological' }[r.kind]} · ${def.rarity}</div>
       <div class="row" style="margin-top:14px"><button class="ebtn cta green grow" id="ok">${em('ui_check', 28)}<span>${isNewEmoji ? 'Added to the Dex!' : 'Nice!'}</span></button></div>`, { dismissable: true });
-    m.querySelector('#ok')!.addEventListener('click', () => closeModal());
+    m.querySelector('#ok')!.addEventListener('click', () => { closeModal(); awardAchievements(); });
     a = b = null; refresh();
   });
   return { refresh };
